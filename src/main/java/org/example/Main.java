@@ -4,9 +4,10 @@ import org.example.json.container.JsonContainer.JSONObject;
 import org.example.json.converter.JsonMapper;
 import org.example.json.lexer.Lexer;
 import org.example.json.parser.Parser;
+import org.example.json.test.Company;
+import org.example.json.test.ExampleClass;
 import org.example.json.test.University;
 import org.example.json.test.User;
-import org.example.json.test.ExampleClass;
 
 import java.util.List;
 import java.util.Map;
@@ -19,13 +20,15 @@ public class Main {
         try {
             // Example JSON string for the User class
             String userJsonString = "{\"name\":\"John Doe\",\"age\":30,\"email\":\"john.doe@example.com\"}";
+            System.out.println("Input JSON string (User): " + userJsonString);
+
+            // Convert JSON string to tokens
             Lexer userLexer = new Lexer(userJsonString);
             List<String> userTokens = userLexer.tokenize();
-            System.out.println("User tokens: " + userTokens);
 
+            // Parse tokens to JSON object
             Parser userParser = new Parser(userTokens);
             JSONObject userJson = userParser.parse();
-            System.out.println("User JSON object: " + userJson);
 
             // Convert JSON to Java object (User)
             User user = JsonMapper.createSpecifiedClassFromJson(User.class, userJson);
@@ -37,7 +40,7 @@ public class Main {
 
             // Convert Java object to JSON string (User)
             String userJsonStringFromObject = JsonMapper.createJsonFromObject(user);
-            System.out.println(userJsonStringFromObject);
+            System.out.println("User JSON string from object: " + userJsonStringFromObject);
 
             // Example JSON string for the University class
             String universityJsonString = "{" +
@@ -61,13 +64,15 @@ public class Main {
                     "}" +
                     "]" +
                     "}";
+            System.out.println("Input JSON string (University): " + universityJsonString);
+
+            // Convert JSON string to tokens
             Lexer universityLexer = new Lexer(universityJsonString);
             List<String> universityTokens = universityLexer.tokenize();
-            System.out.println("University tokens: " + universityTokens);
 
+            // Parse tokens to JSON object
             Parser universityParser = new Parser(universityTokens);
             JSONObject universityJson = universityParser.parse();
-            System.out.println("University JSON object: " + universityJson);
 
             // Convert JSON to Java object (University)
             University university = JsonMapper.createSpecifiedClassFromJson(University.class, universityJson);
@@ -79,17 +84,19 @@ public class Main {
 
             // Convert Java object to JSON string (University)
             String universityJsonStringFromObject = JsonMapper.createJsonFromObject(university);
-            System.out.println(universityJsonStringFromObject);
+            System.out.println("University JSON string from object: " + universityJsonStringFromObject);
 
             // Example JSON string for the ExampleClass
             String exampleJsonString = "{\"isActive\":true,\"name\":\"Test Name\"}";
+            System.out.println("Input JSON string (ExampleClass): " + exampleJsonString);
+
+            // Convert JSON string to tokens
             Lexer exampleLexer = new Lexer(exampleJsonString);
             List<String> exampleTokens = exampleLexer.tokenize();
-            System.out.println("ExampleClass tokens: " + exampleTokens);
 
+            // Parse tokens to JSON object
             Parser exampleParser = new Parser(exampleTokens);
             JSONObject exampleJson = exampleParser.parse();
-            System.out.println("ExampleClass JSON object: " + exampleJson);
 
             // Convert JSON to Java object (ExampleClass)
             ExampleClass example = JsonMapper.createSpecifiedClassFromJson(ExampleClass.class, exampleJson);
@@ -101,29 +108,51 @@ public class Main {
 
             // Convert Java object to JSON string (ExampleClass)
             String exampleJsonStringFromObject = JsonMapper.createJsonFromObject(example);
-            System.out.println(exampleJsonStringFromObject);
+            System.out.println("ExampleClass JSON string from object: " + exampleJsonStringFromObject);
 
-            // Example JSON string for the ExampleClass with an empty name
-            String emptyNameJsonString = "{\"isActive\":false,\"name\":\"\"}";
-            Lexer emptyNameLexer = new Lexer(emptyNameJsonString);
-            List<String> emptyNameTokens = emptyNameLexer.tokenize();
-            System.out.println("Empty name ExampleClass tokens: " + emptyNameTokens);
+            // Example JSON string for the Company class
+            String companyJsonString = "{" +
+                    "\"name\":\"Tech Corp\"," +
+                    "\"departments\":[" +
+                    "{" +
+                    "\"name\":\"Research\"," +
+                    "\"manager\":{\"name\":\"Dr. Smith\",\"age\":55}," +
+                    "\"employees\":[" +
+                    "{\"name\":\"Alice\",\"age\":30,\"skills\":[\"Java\",\"Python\"]}," +
+                    "{\"name\":\"Bob\",\"age\":35,\"skills\":[\"JavaScript\",\"React\"]}" +
+                    "]" +
+                    "}," +
+                    "{" +
+                    "\"name\":\"Development\"," +
+                    "\"manager\":{\"name\":\"Mr. Johnson\",\"age\":45}," +
+                    "\"employees\":[" +
+                    "{\"name\":\"Charlie\",\"age\":25,\"skills\":[\"C++\",\"Go\"]}," +
+                    "{\"name\":\"David\",\"age\":28,\"skills\":[\"Swift\",\"Objective-C\"]}" +
+                    "]" +
+                    "}" +
+                    "]" +
+                    "}";
+            System.out.println("Input JSON string (Company): " + companyJsonString);
 
-            Parser emptyNameParser = new Parser(emptyNameTokens);
-            JSONObject emptyNameJson = emptyNameParser.parse();
-            System.out.println("Empty name ExampleClass JSON object: " + emptyNameJson);
+            // Convert JSON string to tokens
+            Lexer companyLexer = new Lexer(companyJsonString);
+            List<String> companyTokens = companyLexer.tokenize();
 
-            // Convert JSON to Java object (ExampleClass with an empty name)
-            ExampleClass emptyNameExample = JsonMapper.createSpecifiedClassFromJson(ExampleClass.class, emptyNameJson);
-            System.out.println("Empty name ExampleClass object: " + emptyNameExample);
+            // Parse tokens to JSON object
+            Parser companyParser = new Parser(companyTokens);
+            JSONObject companyJson = companyParser.parse();
 
-            // Convert JSON to Map (ExampleClass with an empty name)
-            Map<String, Object> emptyNameJsonMap = JsonMapper.createMapFromJson(emptyNameJson);
-            System.out.println("Empty name ExampleClass JSON map: " + emptyNameJsonMap);
+            // Convert JSON to Java object (Company)
+            Company company = JsonMapper.createSpecifiedClassFromJson(Company.class, companyJson);
+            System.out.println("Company object: " + company);
 
-            // Convert Java object to JSON string (ExampleClass with an empty name)
-            String emptyNameJsonStringFromObject = JsonMapper.createJsonFromObject(emptyNameExample);
-            System.out.println(emptyNameJsonStringFromObject);
+            // Convert JSON to Map (Company)
+            Map<String, Object> companyJsonMap = JsonMapper.createMapFromJson(companyJson);
+            System.out.println("Company JSON map: " + companyJsonMap);
+
+            // Convert Java object to JSON string (Company)
+            String companyJsonStringFromObject = JsonMapper.createJsonFromObject(company);
+            System.out.println("Company JSON string from object: " + companyJsonStringFromObject);
 
         } catch (Exception e) {
             e.printStackTrace();

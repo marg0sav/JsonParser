@@ -10,9 +10,11 @@ import org.example.json.container.JsonContainer.JSONBoolean;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 /**
  * The JsonMapper class provides methods to map JSON objects to Java objects and vice versa.
  */
@@ -32,13 +34,11 @@ public class JsonMapper {
         constructor.setAccessible(true);
         T instance = constructor.newInstance();
         Map<String, JSONValue> map = json.values();
-        System.out.println("Creating instance of class: " + clazz.getName());
 
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             if (map.containsKey(field.getName())) {
                 JSONValue value = map.get(field.getName());
-                System.out.println("Processing field: " + field.getName() + " with value: " + value);
 
                 if (field.getType().isArray()) {
                     Class<?> componentType = field.getType().getComponentType();
@@ -47,7 +47,6 @@ public class JsonMapper {
                     Object array = Array.newInstance(componentType, list.size());
                     for (int i = 0; i < list.size(); i++) {
                         JSONValue element = list.get(i);
-                        System.out.println("Array element before conversion: " + element);
                         if (componentType.isPrimitive() || componentType.equals(String.class)) {
                             Array.set(array, i, convertJsonValueToObject(element, componentType));
                         } else {
@@ -58,7 +57,6 @@ public class JsonMapper {
                                 Array.set(array, i, componentType.cast(convertJsonValueToObject(element, componentType)));
                             }
                         }
-                        System.out.println("Array element after conversion: " + Array.get(array, i));
                     }
                     field.set(instance, array);
                 } else if (value instanceof JSONObject) {
@@ -73,7 +71,6 @@ public class JsonMapper {
         return instance;
     }
 
-
     /**
      * Converts a JSONValue object to a Java object of the specified type.
      *
@@ -82,7 +79,6 @@ public class JsonMapper {
      * @return The converted Java object.
      */
     private static Object convertJsonValueToObject(JSONValue value, Class<?> targetType) {
-        System.out.println("Converting JSONValue to Object: " + value + " for target type: " + targetType.getName());
         if (value instanceof JSONString) {
             return ((JSONString) value).getValue();
         } else if (value instanceof JSONNumber) {
@@ -103,26 +99,16 @@ public class JsonMapper {
         } else if (value instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) value;
             List<JSONValue> list = jsonArray.getValues();
-            if (targetType.isArray()) {
-                Object array = Array.newInstance(targetType.getComponentType(), list.size());
-                for (int i = 0; i < list.size(); i++) {
-                    Array.set(array, i, convertJsonValueToObject(list.get(i), targetType.getComponentType()));
-                }
-                return array;
-            } else {
-                // handle case where targetType is Object.class
-                Object[] array = new Object[list.size()];
-                for (int i = 0; i < list.size(); i++) {
-                    array[i] = convertJsonValueToObject(list.get(i), Object.class);
-                }
-                return array;
+            List<Object> arrayList = new ArrayList<>();
+            for (JSONValue element : list) {
+                arrayList.add(convertJsonValueToObject(element, Object.class));
             }
+            return arrayList;
         } else if (value instanceof JSONObject) {
-            return value; // return as is for nested objects
+            return createMapFromJson((JSONObject) value);
         }
         return null;
     }
-
 
     /**
      * Sets the value of a field in an object.
@@ -172,15 +158,18 @@ public class JsonMapper {
                 field.setAccessible(true);
                 Object value = field.get(obj);
                 if (value != null) {
-                    System.out.println("Processing field: " + field.getName() + " with value: " + value);
                     if (value.getClass().isArray()) {
                         int length = Array.getLength(value);
                         JSONArray jsonArray = new JSONArray();
                         for (int i = 0; i < length; i++) {
                             Object element = Array.get(value, i);
-                            System.out.println("Array element before conversion: " + element);
                             jsonArray.add(convertObjectToJsonValue(element));
-                            System.out.println("Array element after conversion: " + element);
+                        }
+                        jsonMap.put(field.getName(), jsonArray);
+                    } else if (value instanceof List) {
+                        JSONArray jsonArray = new JSONArray();
+                        for (Object element : (List<?>) value) {
+                            jsonArray.add(convertObjectToJsonValue(element));
                         }
                         jsonMap.put(field.getName(), jsonArray);
                     } else {
@@ -196,7 +185,6 @@ public class JsonMapper {
     }
 
     private static JSONValue convertObjectToJsonValue(Object value) {
-        System.out.println("Converting Object to JSONValue: " + value);
         if (value instanceof String) {
             return new JSONString((String) value);
         } else if (value instanceof Number) {
@@ -209,6 +197,12 @@ public class JsonMapper {
                 jsonMap.put(entry.getKey().toString(), convertObjectToJsonValue(entry.getValue()));
             }
             return new JSONObject(jsonMap);
+        } else if (value instanceof List) {
+            JSONArray jsonArray = new JSONArray();
+            for (Object element : (List<?>) value) {
+                jsonArray.add(convertObjectToJsonValue(element));
+            }
+            return jsonArray;
         } else if (value.getClass().isArray()) {
             JSONArray jsonArray = new JSONArray();
             int length = Array.getLength(value);
@@ -228,7 +222,6 @@ public class JsonMapper {
                 field.setAccessible(true);
                 Object value = field.get(obj);
                 if (value != null) {
-                    System.out.println("Processing field: " + field.getName() + " with value: " + value);
                     jsonMap.put(field.getName(), convertObjectToJsonValue(value));
                 }
             }
